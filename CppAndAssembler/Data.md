@@ -8,18 +8,20 @@
 
 실행되는 코드이외에도 데이터나 여러 정보들이 있을 수 있는데, 작성한 SASM을 보면 그림과 같이 섹션이 나누어 진 것이 보인다.
 
-    %include "io64.inc"
+```
+%include "io64.inc"
 
-    section .text
-    global CMAIN
-    CMAIN:
-      PRINT_STRING msg
+section .text
+global CMAIN
+CMAIN:
+  PRINT_STRING m
 
-      xor rax, rax
-      ret
+  xor rax, rax
+  ret
 
-    section .data
-       msg db "Hello World", 0x00
+section .data
+   msg db "Hello World", 0x00
+```
 
 ![실행 파일 구조 그림](Image/PEFileStructure.png)
 
@@ -79,3 +81,58 @@ A) 비트와 바이트를 통해 구현한다.
 진법 표현은 계산기 앱으로도 쉽게 구할 수 있음
 
 ![계산기 사진](Image\Calculator.png)
+
+# 📌 레지스터
+
+어셈블리 프로그래밍에서는 CPU, 레지스터, 메모리가 핵심 역활을 하게 되는데, 메모리에서 레지스터로 올라가는 과정을 살펴본다.
+
+    2^6(64) bit = 2^3(8) byte = 2^2 (4) word = 2 dword(Double-Word) = 1 qword(quad-word)
+
+Q) 레지스터를 사용하는 이유
+
+A) CPU가 연산을 한 내용을 임시적으로 저장하기 위한 용도.
+
+    메인 메모리는 접근하기에 시간이 많이 걸리므로 레지스터를 CPU안에 넣어서 계산값을 저장함.
+
+레지스터는 여러 종류가 있다.
+각각의 크기에 맞게 사용하게 되는데
+
+1. rax 64 bit(전체)를 사용
+2. eax 32 bit(절반)를 사용
+3. ax 16 bit(1/4)를 사용
+4. ah,al 8 bit (15/16)를 사용
+
+> 범용 레지스터는 rax ~ rdx까지 있다 [참조](https://peemangit.tistory.com/37)
+
+> 그림에서는 나오지 않았으나 64 bit 운영체제일 경우 rax 까지 확장됨
+
+[![레지스터 그림](Image\Register.png)](https://m.blog.naver.com/mjnms/220460806744)
+
+```
+mov {reg1}, cst
+```
+
+- 특정 값을 레지스터 안에 넣는 명령어
+
+```
+mov reg1. reg2
+```
+
+- reg2값을 reg1으로 복사
+
+EX)
+
+![에러그림](Image\Error.png)
+
+> cl은 최하위 8bit를 사용하는데 너무 큰 값이 들어가서 에러가 뜸
+
+디버깅을 사용하면 해당 레지스터를 변경하는 것을 쉽게 볼 수 있음
+
+    레지스터 값은 SASM기준으로 디버그에서 Show Register을 키면 볼 수 있다
+
+<img src="Image/Debug.png" width="700" height="500"/>
+<img src="Image/Debug2.png" width="700" height="500"/>
+
+그림 1과 2의 차이를 보면 12번째 라인에서 eax(4바이트)에 들어있는 al(2바이트)에 00을 넣어 al을 0으로 만든 것을 볼 수 있다.
+
+그러므로 0x1234 에서 0x00이 아닌 0x1200으로 변함을 볼 수 있다.
