@@ -6,14 +6,16 @@
 4. [📌 데이터 기초](#-데이터-기초)
 5. [📌 레지스터](#-레지스터)
 6. [📌 변수의 선언 및 사용](#-변수의-선언-및-사용)
+7. [📌 문자와 멘디안](#-문자와-멘디안)
 
 # 📌 어셈블러
 
 프로그래밍 언어는 고급 언어에서 기계어로 변환하는 과정이 필요하다.
 
 이 과정에서 어셈블리 언어가 필요한데 이 과정을 해주는 것이 컴파일러, 어셈블러 이다.
-
-<img src="Image/Compiler.jfif" width=50%/>
+[
+<img src="Image/Compiler.jfif" width=60%/>
+](http://www.kwangsiklee.com/2018/06/%EC%BB%B4%ED%8C%8C%EC%9D%BC%EB%9F%AC-%EA%B0%95%EC%9D%98-1-%EA%B0%9C%EC%9A%94/)
 
 실행되는 코드이외에도 데이터나 여러 정보들이 있을 수 있는데, 작성한 SASM을 보면 그림과 같이 섹션이 나누어 진 것이 보인다.
 
@@ -32,7 +34,9 @@ section .data
    msg db "Hello World", 0x00
 ```
 
+[
 <img src="Image/PEFileStructure.png" width="80%"/>
+](https://furysecurity.tistory.com/28)
 
 > 작성한 코드에서는 Section(".text")에 코드가 들어가고 Data즉 HelloWorld는 Section(".data")에 들어가게 된다.
 
@@ -40,7 +44,9 @@ section .data
 
 # 📌 컴퓨터 구조
 
+[
 <img src="Image/ComputerStructure.png" width="80%"/>
+](https://m.blog.naver.com/kjyong86/140161466414)
 
 컴퓨터 구조의 핵심은 CPU, Main Memory(RAM), Hard Disk가 있는데, Ram은 휘발성, Disk는 비 휘발성인 특징이 있고, 속도는 Ram이 하드 디스크 보다 빠르다.
 
@@ -54,7 +60,9 @@ CPU에서는 연산(실행)이 이루어 진다
 
 # 📌 프로세스 메모리 구조
 
+[
 <img src="Image/MemoryStructure.png" width="80%"/>
+](https://velog.io/@yeahg_dev/TIL11.-C-%EB%A9%94%EB%AA%A8%EB%A6%AC-%ED%95%A0%EB%8B%B9-%EB%A9%94%EB%AA%A8%EB%A6%AC-%EA%B5%AC%EC%A1%B0)
 
 위와 같이 코드, 데이터, 힙, 스택으로 구분되어 있으며 힙은 아래로 스택은 위로 확장하는 구조를 가진다.
 
@@ -175,7 +183,7 @@ EX)
 
 <br>
 
-![프로세스 메모리 구조](Image\ProcessMemoryStructure.png)
+<img src="Image\ProcessMemoryStructure.png" width="80%"/>
 
 <br>
 
@@ -203,7 +211,7 @@ Why) 데이터 영역에 연속된 공간에 할당했기 때문
 
 <br>
 
-![데이터 출력시](Image\PrintData.png)
+<img src="Image\PrintData.png" width="80%"/>
 
 <br>
 
@@ -228,7 +236,7 @@ CMAIN:
 
 <br>
 
-![메모리](Image\Memory.png)
+<img src="Image\Memory.png" width="80%"/>
 
 > Q) 왜 벨류가 아닌 레퍼를 주소로 주나 <br>
 > A) 변수는 "바뀔 수 있는 수" 이기 떄문에 벨류가 아닌 레퍼를 주어서 바뀌는지 알 수 있어야 한다.<br>
@@ -254,7 +262,7 @@ CMAIN:
 
     mov al, [a]
     ; al (1 Byte)만 꺼내온다. 이렇게 하면 위에서 12345678으로 되어있는 값에서 12345611로 변함을 볼 수 있다.
-        ret
+     ret
 
     ; ex) Data dw 0x00
 
@@ -268,7 +276,7 @@ section .bss
     e resb 10
 ```
 
-![메모리 결과](Image\MemoryResult.png)
+<img src="Image\MemoryResult.png" width="80%"/>
 
 반대로 값을 메모리에 넣을 수 있다.
 
@@ -283,16 +291,72 @@ CMAIN:
     mov [a], cl         ; 공간을 변수에 할당
     mov [a], byte 0x99  ; 상수를 변수에 할당
 
-        ret
+    ret
 ```
 
 > 💡 상수를 메모리에 넣을때, 크기를 지정해주는 것이 필수
 
-![메모리 결과2](Image\MemoryResult2.png)
+<img src="Image\MemoryResult2.png" width="80%"/>
 
 <br>
 
 > Q) a의 크기(1byte) 보다 큰 word(2byte)를 할당하면 어떻게 될까<br>
 > A) 해당 값을 넘어서 다른 변수의 메모리도 바꾼다. (Overr Flow)
 
-![메모리 결과3](Image\MemoryResult3.png)
+<img src="Image\MemoryResult3.png" width="80%"/>
+
+<br>
+
+# 📌 문자와 엔디안
+
+데이터는 항상 2비트 진수로 표현된다.
+
+16진수의 0x11(17)은 비트로 10001(0001 0001)로 표기된다.
+
+즉 모든 수는 2비트로 변환되어 표기됨
+
+변수의 값에 데이터를 여러개 넣을 수 있다.
+
+```avrasm
+msg db 'hello World', 0x00
+a db 0x11, 0x11, 0x11, 0x11
+; {변수이름} {크기} {초기값}
+```
+
+위와 같이 넣을 경우 a가 가르키는 주소값을 넘어서 데이터가 들어가게 된다.
+
+> 크기에 해당하는 여러 초기값을 연속적 공간에 할당한다. <br>
+> hello World또한 디버그를 보면 byte단위로 아스키 코드로 char이 기록되어 있다. <br>
+> 💡 데이터의 끝에 끝을 나타내는 0x00을 붙여준다.
+
+<img src="Image\MultyData.png" width="80%"/>
+
+데이터를 저장할때, dd 4byte로 저장할 경우 아래와 같이 데이터가 12,34,56,78이 아닌 78,56,34,12로 뒤집혀서 저장됨을 볼 수 있다.
+
+메모리에 저장이 될 때 2가지 방법이 있다. (엔디안)
+
+1. 정순으로 저장 (Big Endian)
+2. 역순으로 저장 (Little Endian)
+
+> 💡 서버와 클라간의 엔디안 동기화 떄문에 문제가 생길 수 도 있으니 데이터 순서에 따라 다른 정보가 될 수 도 있음.
+
+[
+<img src="Image\Endian.jfif" width="80%"/>
+](https://genesis8.tistory.com/37)
+
+> Q) 왜 이렇게 둘로 나눠 놨을까? <br>
+> A) 각각의 포멧의 장단점이 있음
+
+1.  리틀 엔디안
+    캐스팅에 유리함
+
+         빅 엔디안과 다르게 캐스팅(바이트를 줄이거나 늘리는 행위)를 할 경우 앞에서부터 데이터를 자를 수 있음
+
+2.  빅 엔디안
+    숫자 비교에 유리함
+
+        큰 자리 부터 비교하면 되므로 큰 자릿수의 숫자부터 비교하기 편하다.
+
+|      | 리틀 엔디안     | 빅 엔디안        |
+| ---- | --------------- | ---------------- |
+| 장점 | 캐스팅에 유리함 | 대소 비교에 유리 |
