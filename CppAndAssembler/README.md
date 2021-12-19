@@ -7,14 +7,16 @@
 5. [📌 레지스터](#-레지스터)
 6. [📌 변수의 선언 및 사용](#-변수의-선언-및-사용)
 7. [📌 문자와 엔디안](#-문자와-엔디안)
+8. [📌 사칙연산](#-사칙연산)
 
 # 📌 어셈블러
 
 프로그래밍 언어는 고급 언어에서 기계어로 변환하는 과정이 필요하다.
 
 이 과정에서 어셈블리 언어가 필요한데 이 과정을 해주는 것이 컴파일러, 어셈블러 이다.
+
 [
-<img src="Image/Compiler.jfif" width=60%/>
+<img src="Image/Compiler.jfif" width=500vp/>
 ](http://www.kwangsiklee.com/2018/06/%EC%BB%B4%ED%8C%8C%EC%9D%BC%EB%9F%AC-%EA%B0%95%EC%9D%98-1-%EA%B0%9C%EC%9A%94/)
 
 실행되는 코드이외에도 데이터나 여러 정보들이 있을 수 있는데, 작성한 SASM을 보면 그림과 같이 섹션이 나누어 진 것이 보인다.
@@ -35,17 +37,19 @@ section .data
 ```
 
 [
-<img src="Image/PEFileStructure.png" width="80%"/>
+<img src="Image/PEFileStructure.png" width=700pv/>
 ](https://furysecurity.tistory.com/28)
 
 > 작성한 코드에서는 Section(".text")에 코드가 들어가고 Data즉 HelloWorld는 Section(".data")에 들어가게 된다.
+
+[코드](Code\Intro\HelloWorld.asm)
 
 <br>
 
 # 📌 컴퓨터 구조
 
 [
-<img src="Image/ComputerStructure.png" width="80%"/>
+<img src="Image/ComputerStructure.png" width=700pv/>
 ](https://m.blog.naver.com/kjyong86/140161466414)
 
 컴퓨터 구조의 핵심은 CPU, Main Memory(RAM), Hard Disk가 있는데, Ram은 휘발성, Disk는 비 휘발성인 특징이 있고, 속도는 Ram이 하드 디스크 보다 빠르다.
@@ -61,7 +65,7 @@ CPU에서는 연산(실행)이 이루어 진다
 # 📌 프로세스 메모리 구조
 
 [
-<img src="Image/MemoryStructure.png" width="80%"/>
+<img src="Image/MemoryStructure.png" width=700pv/>
 ](https://velog.io/@yeahg_dev/TIL11.-C-%EB%A9%94%EB%AA%A8%EB%A6%AC-%ED%95%A0%EB%8B%B9-%EB%A9%94%EB%AA%A8%EB%A6%AC-%EA%B5%AC%EC%A1%B0)
 
 위와 같이 코드, 데이터, 힙, 스택으로 구분되어 있으며 힙은 아래로 스택은 위로 확장하는 구조를 가진다.
@@ -103,7 +107,8 @@ A) 비트와 바이트를 통해 구현한다.
 
 진법 표현은 계산기 앱으로도 쉽게 구할 수 있음
 
-<img src="Image/Calculator.png" width="80%"/>
+<img src="Image/Calculator.png" width=700pv/>
+
 <br>
 
 # 📌 레지스터
@@ -129,23 +134,23 @@ A) CPU가 연산을 한 내용을 임시적으로 저장하기 위한 용도.
 > 범용 레지스터는 rax ~ rdx까지 있다 [참조](https://peemangit.tistory.com/37)<br>
 > 그림에서는 나오지 않았으나 64 bit 운영체제일 경우 rax 까지 확장됨
 
-<img src="Image/Register.png" width="80%"/>
+<img src="Image/Register.png" width=700pv/>
 
 ```avrasm
-mov {reg1}, cst
+mov {reg1}, {value}
 ```
 
 - 특정 값을 레지스터 안에 넣는 명령어
 
 ```avrasm
-mov reg1. reg2
+mov {reg1}. {reg2}
 ```
 
 - reg2값을 reg1으로 복사
 
 EX)
 
-<img src="Image/Error.png" width="80%"/>
+<img src="Image/Error.png" width=700pv/>
 
 > 💡 cl은 최하위 8bit를 사용하는데 너무 큰 값이 들어가서 에러가 뜸
 
@@ -153,17 +158,21 @@ EX)
 
     레지스터 값은 SASM기준으로 디버그에서 Show Register을 키면 볼 수 있다
 
-<img src="Image/Debug2.png" width="80%"/>
+<img src="Image/Debug2.png" width=700pv/>
 
 12번째 라인에서 eax(4바이트)에 들어있는 0x1234에 al(2바이트)인 00을 넣어 al을 0으로 만든 것을 볼 수 있다.
 
 - 0x1234 (4byte) 에서 0x00이 아닌 0x1200으로 변함을 볼 수 있다.
+
+[코드](Code\Intro\Register.asm)
 
 <br>
 
 # 📌 변수의 선언 및 사용
 
 초기화 된 데이터를 사용할 경우 data 영역에 들어감
+
+변수 = 메모리
 
     {변수이름} {크기} {초기값}
     크기 명령어(byte) => db(1) dw(2) dd(4) dq(8)
@@ -183,7 +192,7 @@ EX)
 
 <br>
 
-<img src="Image\ProcessMemoryStructure.png" width="80%"/>
+<img src="Image\ProcessMemoryStructure.png" width=700pv/>
 
 <br>
 
@@ -211,7 +220,7 @@ Why) 데이터 영역에 연속된 공간에 할당했기 때문
 
 <br>
 
-<img src="Image\PrintData.png" width="80%"/>
+<img src="Image\PrintData.png" width=700pv/>
 
 <br>
 
@@ -220,7 +229,7 @@ section .text
 global CMAIN
 CMAIN:
 
-  ; 변수를 메모리에 할당
+  ; 변수를 레지스터에 할당
   mov rax, a
   ; 이때 주소값으로 전달해준다. 즉 콜바이 벨류가 아닌 레퍼
   ret
@@ -236,7 +245,7 @@ CMAIN:
 
 <br>
 
-<img src="Image\Memory.png" width="80%"/>
+<img src="Image\Memory.png" width=700pv/>
 
 > Q) 왜 벨류가 아닌 레퍼를 주소로 주나 <br>
 > A) 변수는 "바뀔 수 있는 수" 이기 떄문에 벨류가 아닌 레퍼를 주어서 바뀌는지 알 수 있어야 한다.<br>
@@ -276,7 +285,7 @@ section .bss
     e resb 10
 ```
 
-<img src="Image\MemoryResult.png" width="80%"/>
+<img src="Image\MemoryResult.png" width=700pv/>
 
 반대로 값을 메모리에 넣을 수 있다.
 
@@ -288,22 +297,24 @@ global CMAIN
 CMAIN:
     mov rbp, rsp; for correct debugging
     ...
-    mov [a], cl         ; 공간을 변수에 할당
-    mov [a], byte 0x99  ; 상수를 변수에 할당
+    mov [a], cl         ; 레지스터 값을 데이터에 할당
+    mov [a], byte 0x99  ; 상수를 데이터에 할당
 
     ret
 ```
 
 > 💡 상수를 메모리에 넣을때, 크기를 지정해주는 것이 필수
 
-<img src="Image\MemoryResult2.png" width="80%"/>
+<img src="Image\MemoryResult2.png" width=700pv/>
 
 <br>
 
 > Q) a의 크기(1byte) 보다 큰 word(2byte)를 할당하면 어떻게 될까<br>
-> A) 해당 값을 넘어서 다른 변수의 메모리도 바꾼다. (Overr Flow)
+> A) 해당 값을 넘어서 다른 데이터의 메모리도 바꾼다. (Overr Flow)
 
-<img src="Image\MemoryResult3.png" width="80%"/>
+<img src="Image\MemoryResult3.png" width=700pv/>
+
+[코드](Code\Intro\Variable.asm)
 
 <br>
 
@@ -329,7 +340,7 @@ a db 0x11, 0x11, 0x11, 0x11
 > hello World또한 디버그를 보면 byte단위로 아스키 코드로 char이 기록되어 있다. <br>
 > 💡 데이터의 끝에 끝을 나타내는 0x00을 붙여준다.
 
-<img src="Image\MultyData.png" width="80%"/>
+<img src="Image\MultyData.png" width=700pv/>
 
 데이터를 저장할때, dd 4byte로 저장할 경우 아래와 같이 데이터가 12,34,56,78이 아닌 78,56,34,12로 뒤집혀서 저장됨을 볼 수 있다.
 
@@ -341,7 +352,7 @@ a db 0x11, 0x11, 0x11, 0x11
 > 💡 서버와 클라간의 엔디안 동기화 떄문에 문제가 생길 수 도 있으니 데이터 순서에 따라 다른 정보가 될 수 도 있음.
 
 [
-<img src="Image\Endian.jfif" width="80%"/>
+<img src="Image\Endian.jfif" width=700pv/>
 ](https://genesis8.tistory.com/37)
 
 > Q) 왜 이렇게 둘로 나눠 놨을까? <br>
@@ -360,3 +371,162 @@ a db 0x11, 0x11, 0x11, 0x11
 |      | 리틀 엔디안     | 빅 엔디안        |
 | ---- | --------------- | ---------------- |
 | 장점 | 캐스팅에 유리함 | 대소 비교에 유리 |
+
+[코드](Code\Intro\CharEndian.asm)
+
+<br>
+
+# 📌 사칙연산
+
+## 데이터 입력, 출력
+
+```avrasm
+GET_DEC {byte} {데이터}
+```
+
+- 인풋창에서 특정 데이터(공간)에 십진수 데이터를 받는 방법
+
+```avrasm
+PRINT_DEC {byte}, {데이터}
+```
+
+- 특정 공간의 데이터를 10진수로 출력
+
+> 💡 참고로 스트링은 `PRINT_STRING {데이터}`
+
+<br>
+
+```avrasm
+%include "io64.inc"
+
+section .text
+global CMAIN
+CMAIN:
+    mov rbp, rsp; for correct debugging
+
+    GET_DEC 1 , al      ;al을 1바이트 10진수를 받음
+    GET_DEC 1 , num
+
+    PRINT_DEC 1, al     ;al의 1바이트를 10진수로 출력
+    NEWLINE             ;개행
+    PRINT_DEC 1, num
+
+    ret
+
+section .bss
+num resb 1 ;인풋으로 받으므로 초기화 할 필요 없음.
+
+```
+
+## 덧셈 사칙 연산
+
+```avrasm
+ADD a, b
+```
+
+- a의 공간에 b를 더한 값을 넣는다.
+
+> 💡 단 a는 레지서터 혹은 메모리여야 하지만, b는 상수까지 가능하다. (a는 상수 X)
+> a, b모두 메모리는 안된다.
+
+<br>
+
+Register + Variable (레지스터 + 변수)
+
+```avrasm
+GET_DEC 1 , num     ; 상수 입력
+add al, num         ; 레지스터에 상수 더해줌
+PRINT_DEC 1, al     ; 레지스터 출력 (Crash)
+NEWLINE
+```
+
+<span style="color:red">Crash!!</span>
+
+Why) 디버깅을 해볼 경우 num에는 1이 아닌 num의 주소값이 들어가 있음. <br>
+
+> al은 1byte인데 num의 주소값을 더해 오버플로우 발생! <br>
+
+Solve) num을 ref값이 아닌 value값으로 변경 즉 num -> [num]
+
+<br>
+
+```avrasm
+GET_DEC 1 , al      ;al에 인풋을 받음
+GET_DEC 1 , num     ; num을 받음
+add al, [num]       ;al += num
+PRINT_DEC 1, al     ;out put 33
+NEWLINE
+```
+
+<br>
+
+| 특이점   | 레지스터 | 변수                                    | 상수                       |
+| -------- | -------- | --------------------------------------- | -------------------------- |
+| 레지스터 | 평범     | 평범                                    | 일반 10진수 대입           |
+| 변수     | 평범     | <span style="color:red">!!안됨!!</span> | 크기를 지정해 줘야 가능함. |
+
+> 💡 변수는 []로 감싸지 않으면 ref값이 들어가게 된다.
+
+[코드](Code\Intro\AddCalculator.asm)
+
+<br>
+
+## 곱하기 연산
+
+곱연산은 더하기 연산과 다르게 까다롭다.
+
+```avrasm
+mul {reg}
+```
+
+- 레지스터가 1개 인데 특정 계산 값을 저장하는 곳이 따로 있다.
+
+  - mul bl => al \* bl 연산을 해서 결과를 ax에 저장. (1byte)
+  - mul bx => ax \* bx 연산 결과는 dx(상위 16비트) ax (하위 16비트) 에 저장 (2byte)
+
+    위와 같이 계산 결과가 각각 저장된다.
+
+```avrasm
+%include "io64.inc"
+
+section .text
+global CMAIN
+CMAIN:
+    mov rbp, rsp    ;for correct debugging
+
+    mov ax, 0
+    mov al, 5
+    mov bl, 8
+    mul bl
+    PRINT_DEC 2, ax ; output 40 (5*8)
+
+
+    ret
+```
+
+## 나누기 연산
+
+```avrasm
+div {reg}
+```
+
+- 이또한 곱하기와 동일하게 1개 레지스터를 받고 계산 값을 저장하는 곳이 따로 있다.
+
+  - div bl => ax / bl 연산을 해서al에 몫, ah에 나머지 저장. (1byte)
+
+    위와 같이 계산 결과가 각각 저장된다.
+
+```avrasm
+    ; 100 / 3
+    mov ax, 100
+    mov bl, 3
+    div bl
+    PRINT_DEC 2, al  ; al = 몫 (33)
+    NEWLINE
+    mov al, ah       ; ah는 프린트 할 수 없으므로 값을 옮겨서 출력
+    PRINT_DEC 2, al  ; ah = 나머지 (1)
+```
+
+[코드](Code\Intro\MulCalculator.asm)
+
+<br>
