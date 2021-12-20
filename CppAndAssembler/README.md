@@ -8,6 +8,7 @@
 6. [📌 변수의 선언 및 사용](#-변수의-선언-및-사용)
 7. [📌 문자와 엔디안](#-문자와-엔디안)
 8. [📌 사칙연산](#-사칙연산)
+9. [📌 시프트 연산과 논리 연산](#-시프트-연산과-논리-연산)
 
 # 📌 어셈블러
 
@@ -530,3 +531,112 @@ div {reg}
 [코드](Code\Intro\MulCalculator.asm)
 
 <br>
+
+# 📌 시프트 연산과 논리 연산
+
+## 시프트 연산
+
+이전에 데이터를 설명할때 데이터는 비트와 바이트로 한다고 설명 하였다.
+
+만약 4를 표기한다고 하면 컴퓨터는 0010으로 표기를 할 것이다.
+
+이때 오른쪽으로 1쉬프트 하게 되면 0001 (1) 왼쪽으로 1하게 되면 0100(8)이 될 것이다.
+
+이런 쉬프트 연산을 지원한다.
+
+> 💡 쉬프트 연산은 바이트가 아닌 비트.
+
+```avrasm
+%include "io64.inc"
+
+section .text
+global CMAIN
+CMAIN:
+    mov rbp, rsp; for correct debugging
+
+    ; 쉬프트(shift) 연산, 논리(logical) 연산
+    mov eax, 0x12345678
+    PRINT_HEX 4, eax        ;12345678
+    NEWLINE
+
+    shl eax, 8              ;좌로 8칸 이동
+    PRINT_HEX 4, eax        ;34567800
+    NEWLINE
+
+    shr eax, 8              ;우로 8칸 이동
+    PRINT_HEX 4, eax        ;345678
+    NEWLINE
+
+    xor rax, rax
+    ret
+
+```
+
+    좌우로 8칸 움직여 원점에 왔는데 출력값이 다른 이유는 OverFlow 되는 비트는 버리고 새로 들어오는 비트는0 으로 처리하기 때문에다.
+    때문에 마지막 라인은 00345678으로 채워져 0이 생략되었다.
+
+> 💡 왼쪽으로 시프트를 하면 \*2가 되고, 오른쪽으로 시프트를 하면 /2가 된다.
+
+<br>
+
+## 논리 연산
+
+1.  not
+
+        not {대상}
+        ; 대상의 비트를 반전
+
+2.  and
+
+        and {대상1} {대상2}
+        ; 대상 1과 2가 둘다 켜진 경우 1을 표기하는 연산을 하여 대상 1에 삽입
+
+3.  or
+
+        or {대상1} {대상2}
+        ; 대상 1혹은 2의 중 하나이상의 비트가 켜진 경우 1을 표기하는 연산을 하여 대상 1에 삽입
+
+4.  xor
+
+        xor {대상1} {대상2}
+        ; 대상 1혹은 2의 비트가 다를 경우 1을 표기하는 연산을 하여 대상 1에 삽입
+
+```
+%include "io64.inc"
+
+section .text
+global CMAIN
+CMAIN:
+    mov rbp, rsp; for correct debugging
+
+    mov al, 0b10010101      ; 1001 0101
+    mov bl, 0b01111100      ; 0111 1100
+
+
+    and al, bl              ; al = al and bl
+    PRINT_HEX 1, al         ; 0001 0100 = 0x14
+    NEWLINE
+
+    not al                  ; al 비트 반전
+    PRINT_HEX 1, al         ; 1110 1011 = 0xeb(15,12)
+    NEWLINE
+
+    or al, bl               ; al = al or bl
+    PRINT_HEX 1, al         ; 1111 1111 = 0xff (16,16)
+    NEWLINE
+
+    xor al, bl              ; al = al xor bl
+    PRINT_HEX 1, al         ; 1000 0011 0x83
+    NEWLINE
+
+    xor rax, rax            ; rax를 0으로 밀어줌. rax는 정상 종료인지 판단하는 부분. = retrun 0;
+    ret
+```
+
+💡 응용 사례
+
+- 비트 플레그를 사용하여 해당 행동을 정할 수 있음.
+
+- xor 는 연산을 두번 할 경우 원래 상태로 복구된다. => 암호학에서 유용 (ex 대칭키)
+
+- 자신을 xor하면 항상 0으로 나오게 된다.
