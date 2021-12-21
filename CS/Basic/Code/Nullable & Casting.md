@@ -1,6 +1,16 @@
 # 목차
 
+1. [Nullable](#Nullable)
 
+   1.1 [Nullable 연산](#Nullable-연산)
+
+   1.2 [Elvis operator](#Elvis-operator)
+
+2. [Casting](#Casting)
+
+   2.1 [is, as Casting](#is,-as-Casting)
+
+   2.2 [변환 연산자 explicit](#변환-연산자-explicit)
 
 <br>
 
@@ -153,5 +163,110 @@ null접합 연산자
 
     💡 null safety
 
+# Casting
 
-# Cast
+C#의 캐스팅 규칙
+
+1. 데이터의 손실이 없는 경우
+
+   암시적 캐스팅 해줌
+
+2. 데이터의 손실이 있을 경우
+
+   명시적 캐스팅 해야한다!
+
+```C#
+int    n = 3;
+double d = 3.4;
+
+d = n;          // ok       int => double. 데이타 손실 없음.
+//n = d;        // error    double=> int.  데이타 손실 발생.
+n = (int)d;     // 명시적 캐스팅
+```
+
+## is, as Casting
+
+다운 캐스팅 시, 모든 부모 타입(Animal)을 다운 캐스팅 하게 되면 원하지 않는 객체또한 캐스팅이 될 우려가 있음
+
+```C#
+// Animal 참조 타입을 Dog 참조타입으로 명시적 캐스팅
+Dog d = (Dog)a;
+// but Dog가 아닐 경우 예외 처리
+d.Cry();
+```
+
+1. is
+
+   참조 변수가 가르키는 실제 타입을 조사할 때 사용
+
+   ```C#
+   if ( a is Dog )
+       {
+           Console.WriteLine("Dog 맞음");
+           Dog d = (Dog)a;
+           d.Cry();
+       }
+   ```
+
+2. as
+
+   명시적 캐스팅시 실패하면 예외 처리가 되나
+
+   as는 실패시 null을 반환함
+
+   ```C#
+   //Dog d = (Dog)a; // 실패시 예외
+   Dog d = a as Dog; // 실패시 null 반환
+   if (d == null)
+   {
+       Console.WriteLine("null");
+   }
+   ```
+
+값 타입에 as 사용할 경우 nullable를 사용해야 한다.
+
+```C#
+int n = 3;
+object obj = n;
+//int n1 = obj as int; // error
+
+int? n1 = obj as int?; // ok
+Console.WriteLine(n1);
+```
+
+## 변환 연산자 explicit
+
+특정 객체를 다른 객체로 `명시적 캐스팅` 할때 사용한다.
+
+자주 사용하지는 않음.
+
+- 단 as로는 못한다. (as는 사용자가 만든 변환 연산자를 호출 할 수 없다.)
+
+ex) Point <-> int로 변환할때
+
+```C#
+
+class Point
+{
+
+    ~~~
+
+    public static explicit operator int(Point pt)
+    {
+        return pt.x;
+    }
+
+    public static explicit operator Point(int n)
+    {
+        return new Point(n, n);
+    }
+}
+
+~~~
+
+Point pt = new Point(1, 2);
+
+int n2 = (int)pt;           // Point => int.. ok
+
+Point pt2 = (Point)n2;      // int => Point
+```
