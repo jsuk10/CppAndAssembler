@@ -165,6 +165,13 @@ Console.WriteLine(t.IsValueType);
 
 해당 Type을 통해 클래스의 타입과 같은 여러 정보들을 알 수 있다.
 
+ex)
+
+    ```C#
+    Type.FullName // 타입의 이름을 출력함
+    Type.BaseType // 해당 타입의 부모를 받음
+    ```
+
 <br>
 
 # Equality
