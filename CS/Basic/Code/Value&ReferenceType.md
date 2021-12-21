@@ -3,6 +3,11 @@
 1. [VlauType](#VlauType)
 2. [which one Vlaue Type](#which-one-Vlaue-Type)
 3. [Check Value vs Reference](#Check-Value-vs-Reference)
+4. [Equality](#Equality)
+
+   4-2. [Reference Type Equality](#Reference-Type-Equality)
+
+   4-2. [Value Type Equality](#Value-Type-Equality)
 
 # VlauType
 
@@ -159,3 +164,169 @@ Console.WriteLine(t.IsValueType);
 ```
 
 해당 Type을 통해 클래스의 타입과 같은 여러 정보들을 알 수 있다.
+
+<br>
+
+# Equality
+
+C#에서 객체의 동등성을 조사하는 방법
+
+ref value 둘다 함수를 통한 비교를 권장한다.
+
+<br>
+
+## Reference Type Equality
+
+1. 연산자 "==" 사용
+
+   - static 메서드로 만들기 때문에 인자를 2개 받아서 서로 비교한다.
+
+   - 상등 연산자(==)를 만들면 같지 않은(!=) 연산자도 정의해야함
+
+2. Equals() 가상 메서드 사용
+
+   - 인자를 1개만 받음, 자신과 비교
+
+둘다 기본 동작으로 참조 대상이 같은가 조사
+
+    - 주소가 동일한지 조사
+
+상태가 동일할 경우를 처리 하고 싶을때, 재정의 하여 사용한다.
+
+```C#
+// 가상함수 재정의
+public override bool Equals(object obj)
+{
+    Point pt = (Point)obj; // as
+    return x == pt.x && y == pt.y;
+}
+// == 연산자 재정의
+public static bool operator ==(Point p1, Point p2)
+{
+    return p1.x == p2.x && p1.y == p2.y;
+}
+public static bool operator !=(Point p1, Point p2)
+{
+    return p1.x != p2.x || p1.y != p2.y;
+}
+```
+
+💡 함수 ovrride 권장함
+
+        함수를 ovrride할 경우, 해당 객체가 나오고,
+        연산자 재정의를 할경우 해당 변수의 타입을 따라가서 작동한다.
+
+|| 연산자 재정의 (==) | 가상 메서드 (ovrride) |
+|| ---------------------------------------- | -------------------------------------------------------- |
+| 특징 | 기본 동작 변경 가능 | 권장 사항 |
+| 구현 | 변수의 타입을 따라가서 작동함 | 재정의 해서 객체의 상태 동일 여부로 구현하는 경우가 많음 |
+
+둘다 기본동작은 참조가 동일한지 조사함.
+
+```c#
+using System;
+
+class Point
+{
+    private int x = 0;
+    private int y = 0;
+    public Point(int xPos, int yPos)
+    {
+        x = xPos;
+        y = yPos;
+    }
+
+    // 가상함수 재정의
+    public override bool Equals(object obj)
+    {
+        Point pt = (Point)obj; // as
+
+        return x == pt.x && y == pt.y;
+    }
+
+    // == 연산자 재정의
+    public static bool operator ==(Point p1, Point p2)
+    {
+        return p1.x == p2.x && p1.y == p2.y;
+    }
+    public static bool operator !=(Point p1, Point p2)
+    {
+        return p1.x != p2.x || p1.y != p2.y;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        //Point p1 = new Point(1, 1);       // ref 타입
+        //Point p2 = p1;                    // p1을 참조함 p1과 p2가 동등 대상 가르킴
+        //Point p3 = new Point(1, 1);       // p3의 새로운 Pointer할당
+
+        //object타입일 경우 가상 메서드는
+        object p1 = new Point(1, 1);
+        object p2 = p1;
+        object p3 = new Point(1, 1);
+
+        // 방법 1. == 연산자 사용
+        // 기본 동작 : 참조(주소)가 동일한가 ?
+        Console.WriteLine(p1 == p2);                // true
+        Console.WriteLine(p1 == p3);                // false        Point일 경우 true
+
+
+        // 방법 2. Equals() 가상함수 사용
+        // 기본 동작 : 참조가 동일 한가 ?
+        Console.WriteLine(p1.Equals(p2));           // true
+        Console.WriteLine(p1.Equals(p3));           // true
+    }
+}
+```
+
+<br>
+
+## Value Type Equality
+
+|| 연산자 재정의 | 가상 메서드 ovrride |
+|| ---------------------------------------- | -------------------------------------------------------- |
+| 특징 | 기본적으로 제공 X | 메모리 전체 내용을 서로 비교함 |
+
+둘다 재정의 해서 원하는 정책으로 할 수 있다.
+
+```C#
+using System;
+
+struct Point
+{
+    public int x;
+    public int y;
+    public Point(int xPos, int yPos)
+    {
+        x = xPos;
+        y = yPos;
+    }
+
+    // x만 비교할 경우 ovrride를 통해 재정의한다.
+    public override bool Equals(object obj)
+    {
+        Point pt = (Point)obj;
+        return x == pt.x;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Point p1 = new Point(1, 1);
+        Point p2 = p1;
+        p2.y = 2;
+
+        // 방법 1. == 연산자 사용
+        // Console.WriteLine(p1 == p2);         //error - 연산자 재정의 하면 error X
+
+        // 방법 2. Equals() 가상함수 사용
+        // 메모리 전체 내용을 서로 비교한다.
+        Console.WriteLine(p1.Equals(p2));       // 재정의시 x 값만 비교하므로 true
+    }
+}
+```
