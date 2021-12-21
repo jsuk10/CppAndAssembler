@@ -1,6 +1,6 @@
 ﻿using System;
 
-class Car : //System.Object 이 생략되어 있음.
+class Car //: System.Object 이 생략되어 있음.
 {
 
 }
