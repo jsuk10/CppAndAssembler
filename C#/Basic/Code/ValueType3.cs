@@ -6,7 +6,7 @@ class Program
     {
         int[] arr = { 1, 2, 3 };
         Type t = arr.GetType();
-        Console.WriteLine(t.);           //False Array is RefType
+        Console.WriteLine(t.IsValueType);           //False Array is RefType
 
         int n = 1;
         Type t1 = n.GetType();
