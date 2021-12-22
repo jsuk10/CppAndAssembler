@@ -17,12 +17,12 @@ CMAIN:
     
     cmp ah, 0      ; 나머지(ah) 가 0과 같으면 짝 아님 홀
     
+LABEL_EQUAL:
     JE LABEL_EQUAL  ; 짝수일 경우 이퀄로
     
     mov rcx, 0      ; 홀수일 경우 실행
     
     JMP LABEL_Not_EQUAL
-LABEL_EQUAL:
     mov rcx, 1      ; 짝수일 경우 실행
 
 LABEL_Not_EQUAL:
