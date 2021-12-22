@@ -601,7 +601,7 @@ CMAIN:
         xor {대상1} {대상2}
         ; 대상 1혹은 2의 비트가 다를 경우 1을 표기하는 연산을 하여 대상 1에 삽입
 
-```
+```avrasm
 %include "io64.inc"
 
 section .text
@@ -640,3 +640,109 @@ CMAIN:
 - xor 는 연산을 두번 할 경우 원래 상태로 복구된다. => 암호학에서 유용 (ex 대칭키)
 
 - 자신을 xor하면 항상 0으로 나오게 된다.
+
+<br>
+
+# 분기문
+
+조건에 따라 흐름을 제어하는 문장, if문
+
+Assam에서는 `CMP dst ,src` 를 통해 하는데 det를 기준으로 한다.
+
+비교한 결과물을 특정 레지스터(Flag Register)에 저장한다.
+
+`JMP [lable]` 시리즈를 통하여 흐름을 제어한다.
+
+    앞의 Jump명령어가 참이면 Lable로 이동
+
+| 명령어 |                   | 기능               |
+| ------ | ----------------- | ------------------ |
+| `JMP`  | jump              | 무조건 Jump        |
+| `JE`   | JumpEquals        | 같으면 Jump        |
+| `JNE`  | JumpNotEquals     | 다르면 Jump        |
+| `JG`   | JumpGreater       | 크면 Jump          |
+| `JGE`  | JumpGreaterEquals | 크거나 같으면 Jump |
+| `JL`   | JumpLess          | 작으면 Jump        |
+| `JLE`  | JumpLessEquals    | 작거나 같으면 Jump |
+
+[이외의 Jump는 해당 블로그 참조](https://anow.tistory.com/94)
+
+예시
+
+```avrasm
+%include "io64.inc"
+
+section .text
+global CMAIN
+CMAIN:
+    mov rbp, rsp; for correct debugging
+
+    ; 분기문
+    ; 특정 조건에 따라 코드 흐름을 제어 하는 것
+    ; ex) 스킬 버튼을 눌렀는가? Yes -> 스킬 사용
+
+    mov rax, 10
+    mov rbx, 20
+
+    cmp rax, rbx    ;비교 연산
+
+    JE LABEL_EQUAL
+
+    mov rcx, 0          ;JE에 의해 점프를 하지 않으면 다르다는 의미가 됨.
+
+    JMP LABEL_EQUAL_END ; 해당 라인이 없을 경우 아래 코드(LABEL_EQUAL)도 실행이 되기 때문에 넣는다.
+
+LABEL_EQUAL:
+    mov rcx, 1
+
+LABEL_EQUAL_END:
+    PRINT_HEX 1, rcx
+
+    ret
+```
+
+cmp의 결과물은 eflags 레지스터에 저장된다.
+
+<img src="Image\CompareResult.png" width=700pv/>
+
+(코드)[Code\Intro\If.asm]
+
+과제 ) 선택된 숫자가 짝수면 0 홀수면 1 출력하는 어셈 작성
+
+```avrasm
+%include "io64.inc"
+
+section .text
+global CMAIN
+CMAIN:
+        mov rbp, rsp; for correct debugging
+
+    ; Q) 특정 숫자를 입력받고 해당 숫자가 짝수면 1 홀수면 0 출력
+
+    GET_DEC 1 , num      ;숫자 할당
+
+    mov rax, [num]      ;숫자를 벨류로 전달
+
+    mov bl, 2       ;나누기 할 숫자
+
+    div bl          ;나눗셈 하여 ax에 몫 ah에 나머지 저장
+
+    cmp 0, ah      ; 나머지(ah) 가 0과 같으면 짝 아님 홀
+
+    JE LABEL_EQUAL  ; 짝수일 경우 이퀄로
+
+    mov rcx, 0      ; 홀수일 경우 실행
+
+    JMP LABEL_Not_EQUAL
+LABEL_EQUAL:
+    mov rcx, 1      ; 짝수일 경우 실행
+
+LABEL_Not_EQUAL:
+
+    PRINT_HEX 1, rcx    ; 짝이면 1 홀이면 0 출력
+
+    ret
+
+section .bss
+    num resb 1
+```
