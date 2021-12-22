@@ -657,6 +657,8 @@ Assam에서는 `CMP dst ,src` 를 통해 하는데 det를 기준으로 한다.
 
     위의 레이블로도 이동 가능
 
+    Go To문과 비슷
+
 | 명령어 |                   | 기능               |
 | ------ | ----------------- | ------------------ |
 | `JMP`  | jump              | 무조건 Jump        |
@@ -740,3 +742,42 @@ LABEL_Not_EQUAL:
 section .bss
     num resb 1
 ```
+
+# 반복문
+
+Hello World를 10번 출력 하려면 어떻게 하나.
+
+1. 무식하게 10번 반복해서 기입
+
+2. 분기문 사용(Jmp)
+
+   ```avrasm
+   LABEL_LOOP:
+        PRINT_STRING msg
+        NEWLINE
+        dec ecx             ;하나씩 줄여주는 명령어
+        cmp ecx, 0
+        JNE LABEL_LOOP
+   ```
+
+3. 반복문 사용(Loop)
+
+   ```avrasm
+    LABEL_Loop_SUM:
+    inc rax
+    LOOP LABEL_Loop_SUM
+
+    PRINT_DEC 1, rax
+
+    ret
+   ```
+
+   ❗ PRINT를 사용할 경우 매우 긴 함수가 축약되어서 표기된것이기 떄문에 OUT OF Range 가 뜬다.
+   (관련 질문)[https://www.inflearn.com/course/%EC%96%B8%EB%A6%AC%EC%96%BC-3d-mmorpg-1/lecture/59440?tab=community&q=144884]
+
+> 기타 팁
+>
+> ```avrasm
+> dec ecx    ; = ecx--
+> inc ecx    ; = ecx++
+> ```
