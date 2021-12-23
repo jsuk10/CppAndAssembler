@@ -1,16 +1,21 @@
 # 목차
 
-1. [📌 어셈블러](#-어셈블러)
-2. [📌 컴퓨터 구조](#-컴퓨터-구조)
-3. [📌 프로세스 메모리 구조](#-프로세스-메모리-구조)
-4. [📌 데이터 기초](#-데이터-기초)
-5. [📌 레지스터](#-레지스터)
-6. [📌 변수의 선언 및 사용](#-변수의-선언-및-사용)
-7. [📌 문자와 엔디안](#-문자와-엔디안)
-8. [📌 사칙연산](#-사칙연산)
-9. [📌 시프트 연산과 논리 연산](#-시프트-연산과-논리-연산)
+1.  [📌 어셈블러](#-어셈블러)
+2.  [📌 컴퓨터 구조](#-컴퓨터-구조)
+3.  [📌 프로세스 메모리 구조](#-프로세스-메모리-구조)
+4.  [📌 데이터 기초](#-데이터-기초)
+5.  [📌 레지스터](#-레지스터)
+6.  [📌 변수의 선언 및 사용](#-변수의-선언-및-사용)
+7.  [📌 문자와 엔디안](#-문자와-엔디안)
+8.  [📌 사칙연산](#-사칙연산)
+9.  [📌 시프트 연산과 논리 연산](#-시프트-연산과-논리-연산)
 10. [📌 분기문](#-분기문)
 11. [📌 반복문](#-반복문)
+12. [📌 배열과 주소](#-배열과-주소)
+
+<br>
+
+---
 
 # 📌 어셈블러
 
@@ -785,3 +790,163 @@ Hello World를 10번 출력 하려면 어떻게 하나.
 > dec ecx    ; = ecx--
 > inc ecx    ; = ecx++
 > ```
+
+<br>
+
+# 배열과 주소
+
+배열 : 동일한 타입의 데이터 묶음
+
+- 배열을 구성하는 각 값을 배열 요소(Element)라고 함.
+
+- 배열의 위치를 가리키는 숫자를 인덱스(Index)라고 함
+
+```avrasm
+%include "io64.inc"
+
+section .text
+global CMAIN
+CMAIN:
+    mov rbp, rsp; for correct debugging
+    ret
+
+section .data
+    a db 0x01, 0x02, 0x03, 0x04, 0x05
+    b times 5 dw 1
+
+section .bss
+    num resb 10
+```
+
+위와 같이 코드를 짜게 되면
+
+데이터는 아래와 같이 저장된다
+
+<br>
+
+<img src="Image/Array1.jpg" width=700vp/>
+
+<br>
+
+a 일반적인 배열 선언
+
+- 5 \* 1 = 5바이트,
+
+b times 키워드를 이용한 배열의 초기화
+
+- b는 5 \* 2 = 10바이트
+
+  b는 전부 1로 초기화 되어 있다.
+
+  ❓ 하지만 출력되는 데이터는 01, 00 => Little Endian
+
+  💡 byte표기를 w로 바꾸면 정상 출력됨을 볼 수 있음
+
+<img src="Image/Array2.jpg" width=700vp/>
+
+<br>
+
+❓ 그러면 다음 주소 a[1]을 보고 싶으면 어떻게 하나?
+
+    ```avrasm
+    %include "io64.inc"
+
+    section .text
+    global CMAIN
+    CMAIN:
+        mov rbp, rsp; for correct debugging
+
+        mov rax , a ;a의 주소값이 rax에 들어간다. 실제값은 [a]로 대입
+
+        PRINT_HEX 1, [rax]
+
+        ret
+
+    section .data
+        a db 0x01, 0x02, 0x03, 0x04, 0x05
+        ;일반적 배열
+        ; 5 * 1 = 5바이트
+        b times 5 dw 9
+        ;times키워드 선언
+        ; 5 * 2  = 10바이트
+
+    section .bss
+        num resb 10
+        ; 0값을 가지는 배열 10개
+    ```
+
+Q1) a의 데이터 출력
+
+A1) Jump를 통해 1씩 증가시킨 값을 보면 된다.
+
+    이때 a + {register}와 같은 연산 지원된다.
+
+    ````avrasm
+    LABLE_A:
+        PRINT_HEX 1, [a+rax]
+        NEWLINE
+        inc rax
+        cmp rax, 5
+        JNE LABLE_A
+        ```
+    ````
+
+Q2) b출력
+
+A2) 2Byte씩 보면 되지 않을까?
+
+    ````avrasm
+    LABLE_B:
+        PRINT_HEX 2, [b+rax]
+        NEWLINE
+        inc rax
+        cmp rax, 5
+        JNE LABLE_B;
+    ````
+
+Result) 8, 800, 8, 800, 8
+
+why) 아래의 그림과 같이 Little Endian으로 표기 되어 있어서 1칸씩 증가하게 되면 (0x08, 0x00) => 8, (0x00, 0x08) => 800, (0x08, 0x00) => 8, 식으로 나오게 된다.
+
+<br>
+
+<img src="Image/Array1.jpg" width=700vp/>
+
+<br>
+
+Solve) inc rax를 두번 해주고 cmp를 10으로
+
+<br>
+
+MySolve)
+
+> ```avrasm
+> LABLE_B:
+>   PRINT_HEX 2, [b+rax]
+>   NEWLINE
+>   inc rax
+>   inc rax
+>   cmp rax, 10
+>   JNE LABLE_B;
+> ```
+
+<br>
+
+Normally Solve)
+
+> ```avrasm
+> LABLE_B:
+>   PRINT_HEX 2, [b+rax * 2]
+>   NEWLINE
+>   inc rax
+>   cmp rax, 5
+>   JNE LABLE_B;
+> ```
+
+<br>
+
+C++과 같은 언어 차원에서 루프문을 만들 경우 해당 데이터의 크기를 고려하여 JMP해준다고 생각하면 된다.
+
+결국 [시작 주소 + Index * DataSize] 형식으로 데이터 값을 불러오는 작업을 하게 된다.
+
+💡 응용
