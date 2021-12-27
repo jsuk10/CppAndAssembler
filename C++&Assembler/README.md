@@ -12,6 +12,8 @@
 10. [📌 분기문](#-분기문)
 11. [📌 반복문](#-반복문)
 12. [📌 배열과 주소](#-배열과-주소)
+13. [📌 함수 기초](#-함수-기초)
+14. [📌 스텍 메모리](#-스텍-메모리)
 
 <br>
 
@@ -1046,3 +1048,175 @@ MAX값을 반환하는 함수 제작
     3. 유효 범위를 유동적으로 확장이 가능하다
 
        함수가 함수 호출 가능
+
+<br>
+
+# 스텍 메모리
+
+메모리는 이와 같이 여러 가지로 구분되어 있다.
+
+<img src="Image/MemoryStructure2.png" width=700vp/>
+
+Stack을 사용할 경우 Stack Frame이 쌓이게 된다.
+
+- Stack Frame은 높은 주소에서 낮은 수소로 쌓인다. 즉 하향식
+
+<img src="Image/StackFrame.png" width=300vp/>
+<img src="Image\ProcessMemoryStructure.png" width=350pv/>
+
+<br>
+
+Stack을 볼 수 있는 방법?
+
+- Register은 다양한 용도로 사용이 된다.
+
+  1. a, b, c, d등 범용 레지스터
+  2. 포인터 레지스터 (포인터 = 위치를 가리키는)
+
+  | 종류              | IP (Instruction Pointer) | SP (Stack Pointer)                     | BP (Base Pointer)   |
+  | ----------------- | ------------------------ | -------------------------------------- | ------------------- |
+  | 역할              | 다음 수행 명령어의 위치  | 현재 스택의 마지막 위치 (일종의 Cusor) | 스택 상대 주소 계산 |
+  | 사용되는 레지스터 | rip                      | rsp                                    | rbp                 |
+
+Stack은 PUSH와 POP을 이용해서 볼 수 있다.
+
+```avrasm
+; Stack에 값을 넣음
+push 1
+push 2
+push 3
+
+; Stack에서 값 꺼
+pop rax
+pop rbx
+pop rcx
+```
+
+<br>
+아래의 그림을 보면 rbp(Base Pointer)에서 3번째 값을 넣을 주소(rsp : Stack Pointer) 가 가르키는 곳에 값을 넣고 있음을 알 수 있다.
+
+<img src="Image\StackFrameCode.png" width=700pv/>
+
+<br>
+
+💡 8감소 2 감소 반복되는 이유<br>
+
+> HEX 즉 16진수로 계산되기 때문에 10진수로 보면 동일값인 8이 감소됨을 알 수 있다.
+
+<br>
+
+Stack에서 POP한다고 해도 메모리에 쓰래기 값을 넣거나 하지는 않는다.
+
+<img src="Image\StackFrameCode2.png" width=700pv/>
+
+## 스텍 메모리를 이용해서 함수 실행하기
+
+Stack을 활용해서 함수를 호출할때 인자는 PUSH를 통해 스텍에 넣어둔다.
+
+```avrasm
+push 1
+push 2
+call MAX
+```
+
+이렇게 되면 Stack은 아래와 같이 구성된다.
+
+| Stack Memory              |
+| ------------------------- |
+| 1                         |
+| 2                         |
+| RET                       |
+| 이전 BP값 `(SP가 가르킴)` |
+
+4번째 라인인 이전 BP값을 통해 함수가 끝날 경우 해당 주소로 이동하여 계속 실행할 수 있다.
+
+> 💡 RET를 통해 해당 함수가 어디에서 호출되었는지, 함수가 끝나면 어디로 가야하는지를 나타냄.
+
+```avrasm
+MAX:
+    push rbp
+    mov rbp, rsp
+
+    pop rbp
+    ret
+```
+
+위와 같이 Stack에 저장하게 되면 이전 위의 표의 SP가 가르키는 값이 BP가 가르키는 값과 동일해 진다.
+
+BP 설정의 이유 ❓
+
+- SP는 Stack의 Top와 동일한 역할을 하여 계속 값이 변한다.
+
+  1. BP를 통해 해당 함수가 어디서부터 시작한지 알 수 있게 된다.
+  2. BP를 통해 주소를 이동하면 해당 함수의 인자를 얻을 수 있다.
+
+BP 를 PUSH / POP 하는 이유 ❓
+
+- 함수를 중첩하여 호출할 수 있기 때문에 함수를 탈출할 경우 해당 함수의 BP를 알아야 연산을 계속 할 수 있다.
+
+💡 Stack Frame
+
+> BP를 통하여 중첩된 함수들을 관리하는 것
+
+<br>
+
+Stack을 이용한 MAX Code
+
+```avrasm
+%include "io64.inc"
+
+section .text
+global CMAIN
+CMAIN:
+    mov rbp, rsp
+
+    ; Stack에 값을 넣음
+    push 3
+    push 9
+    call MAX
+    PRINT_DEC 8, rax
+    NEWLINE
+
+    xor rax, rax
+    ret
+
+MAX:
+    push rbp
+    mov rbp, rsp
+
+    mov rax, [rbp + 16] ; ret와 BP가 저장되어 있으므로 +16(8*2)
+    mov rbx, [rbp + 24]
+    cmp rax, rbx
+    jg LI
+    mov rax, rbx
+
+LI:
+    pop rbp
+    ret
+```
+
+❗ 정상 출력되나 Crash가 생긴다.
+
+- 스텍에 멋대로 값을 넣게 되는 경우 깔끔하게 정리 해야 한다.
+
+```avrasm
+    call MAX
+    PRINT_DEC 8, rax
+    NEWLINE
+    pop rax
+    pop rax
+```
+
+위와 같이 pop을 하여 Stack을 정리하거나, rsp(Stack Pointer)에 16을 더해 Stack에 아무것도 없음을 나타내야 한다.
+
+💡 만약 함수 호출 이후 Stack값을 사용하고 싶을 경우 rbp에 값을 더하는게 아닌 빼는 것으로 사용할 수 있다.
+
+```avrasm
+    mov rbx, [rbp - 8]  ; 호출 이후 처음으로 push한 값을 사용하기
+```
+
+위의 코드에서 또한 문제점이 있다.
+
+MAX함수에서 rax와 rbx를 사용한다는 문제점이 있는데 이는 Stack을 활용하여 해결 할 수 있다.
+
+[Code](Code\Intro\StackFunction.asm)
