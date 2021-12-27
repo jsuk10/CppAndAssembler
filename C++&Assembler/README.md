@@ -848,61 +848,61 @@ b times 키워드를 이용한 배열의 초기화
 
 ❓ 그러면 다음 주소 a[1]을 보고 싶으면 어떻게 하나?
 
-    ```avrasm
-    %include "io64.inc"
+```avrasm
+%include "io64.inc"
 
-    section .text
-    global CMAIN
-    CMAIN:
-        mov rbp, rsp; for correct debugging
+section .text
+global CMAIN
+CMAIN:
+    mov rbp, rsp; for correct debugging
 
-        mov rax , a ;a의 주소값이 rax에 들어간다. 실제값은 [a]로 대입
+    mov rax , a ;a의 주소값이 rax에 들어간다. 실제값은 [a]로 대입
 
-        PRINT_HEX 1, [rax]
+    PRINT_HEX 1, [rax]
 
-        ret
+    ret
 
-    section .data
-        a db 0x01, 0x02, 0x03, 0x04, 0x05
-        ;일반적 배열
-        ; 5 * 1 = 5바이트
-        b times 5 dw 9
-        ;times키워드 선언
-        ; 5 * 2  = 10바이트
+section .data
+    a db 0x01, 0x02, 0x03, 0x04, 0x05
+    ;일반적 배열
+    ; 5 * 1 = 5바이트
+    b times 5 dw 9
+    ;times키워드 선언
+    ; 5 * 2  = 10바이트
 
-    section .bss
-        num resb 10
-        ; 0값을 가지는 배열 10개
-    ```
+section .bss
+    num resb 10
+    ; 0값을 가지는 배열 10개
+```
 
 Q1) a의 데이터 출력
 
 A1) Jump를 통해 1씩 증가시킨 값을 보면 된다.
 
-    이때 a + {register}와 같은 연산 지원된다.
+이때 a + {register}와 같은 연산 지원된다.
 
-    ````avrasm
-    LABLE_A:
-        PRINT_HEX 1, [a+rax]
-        NEWLINE
-        inc rax
-        cmp rax, 5
-        JNE LABLE_A
-        ```
-    ````
+````avrasm
+LABLE_A:
+    PRINT_HEX 1, [a+rax]
+    NEWLINE
+    inc rax
+    cmp rax, 5
+    JNE LABLE_A
+    ```
+````
 
 Q2) b출력
 
 A2) 2Byte씩 보면 되지 않을까?
 
-    ````avrasm
-    LABLE_B:
-        PRINT_HEX 2, [b+rax]
-        NEWLINE
-        inc rax
-        cmp rax, 5
-        JNE LABLE_B;
-    ````
+```avrasm
+LABLE_B:
+    PRINT_HEX 2, [b+rax]
+    NEWLINE
+    inc rax
+    cmp rax, 5
+    JNE LABLE_B;
+```
 
 Result) 8, 800, 8, 800, 8
 
@@ -949,4 +949,100 @@ C++과 같은 언어 차원에서 루프문을 만들 경우 해당 데이터의
 
 결국 [시작 주소 + Index * DataSize] 형식으로 데이터 값을 불러오는 작업을 하게 된다.
 
-💡 응용
+<br>
+
+# 함수 기초
+
+함수 (프로시저, procedure 서브 루틴, subroutine)
+
+> 자주 사용하는 코드를 재사용 할 수 있게 묶음 단위로 만든 것.
+
+> Input(Parameter), Output(Return)이 있다.
+
+<br>
+
+함수 예시
+
+Label을 만드는 행위와 비슷하다.
+
+함수의 호출은 `call`을 사용한다.
+
+```avrasm
+%include "io64.inc"
+
+section .text
+global CMAIN
+CMAIN:
+
+    CALL PRINT_MESG
+
+    xor rax, rax
+    ret
+
+; 함수 구현부.
+PRINT_MESG:
+    PRINT_STRING msg
+    NEWLINE
+    ret
+
+section.data
+    msg db "HI", 0x00
+```
+
+> ❗ F5(Debug) 를 눌러서 디버깅 할 경우 F10(Step Over)을 누르면 건너 뛰고 F11(Step Into)을 누르면 함수 까지 들어간다.
+
+<br>
+
+💡 함수는 Input와 Output이 있는데 어떻게 받고 어떻게 반환 할 것인가?
+
+<br>
+
+MAX값을 반환하는 함수 제작
+
+1.  Register을 이용하는 방법
+
+    `eax`와 `ebx`에 비교 값이 들어 있으며 반환 값은 `ecx`에 저장된다고 가정한다.
+
+    ```avrasm
+    MAX:
+        cmp eax, ebx
+        jg L1
+        mov ecx, ebx,
+        JMP RETURN
+    L1:
+        mov ecx, eax
+    RETURN:
+        ret
+    ```
+
+    문제점 1. 인자 값이 많이 있을 경우?
+
+    문제점 2. 레지스터가 사용중일 경우?
+
+2.  data, bss 영역을 사용한다.
+
+    문제점1. 인자를 몇개 할당해야 하나?
+
+    문제점2. 데이터 저장에 메모리를 많이 사용해야 한다.
+
+3.  Stack메모리 사용
+
+    1. 함수에서 함수를 호출 가능하다.
+    2. 인자를 몇개 받을지 모른다.
+    3. Input/Output값을 저장할 공간이 마땅하지 않다.
+
+       위의 문제를 해결하기 위해 `Stack`라는 메모리 구조가 추가 되었다.
+
+    Stack메모리 구현 조건
+
+    1. 유효 범위(Scope)의 개념 등장
+
+       함수가 실행중에는 메모리의 유효성을 보장 받아야 한다.
+
+    2. 함수가 끝나면 메모리를 정리 해준다.
+
+       필요 없는 메모리를 자동으로 해제한다. (메모리 누수 방지)
+
+    3. 유효 범위를 유동적으로 확장이 가능하다
+
+       함수가 함수 호출 가능
